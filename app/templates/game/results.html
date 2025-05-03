@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Game Results{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-{% if game.won %}success{% else %}danger{% endif %} text-white">
+                <h3 class="text-center">
+                    {% if game.won %}Congratulations!{% else %}Game Over{% endif %}
+                </h3>
+            </div>
+            <div class="card-body text-center">
+                {% if game.won %}
+                    <div class="alert alert-success">
+                        <h4>You guessed it!</h4>
+                        <p>The number was {{ game.secret_number }}</p>
+                        <p>You scored {{ game.score }} points!</p>
+                    </div>
+                {% else %}
+                    <div class="alert alert-danger">
+                        <h4>Better luck next time!</h4>
+                        <p>The number was {{ game.secret_number }}</p>
+                    </div>
+                {% endif %}
+                
+                <div class="game-stats mt-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5>Level</h5>
+                                    <p>{{ game.level|title }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5>Attempts Used</h5>
+                                    <p>{{ attempts_used }}/{{ total_attempts }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('game.select_level') }}" class="btn btn-primary me-2">Play Again</a>
+                    <a href="{{ url_for('game.leaderboard') }}" class="btn btn-outline-primary">View Leaderboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

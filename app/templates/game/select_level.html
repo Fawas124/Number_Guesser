@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Select Level{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <h1 class="mb-4">Select Difficulty Level</h1>
+        <div class="row">
+            {% for level, settings in LEVEL_SETTINGS.items() %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ level|title }}</h5>
+                        <p class="card-text">Guess a number between 1-{{ settings.range[1] }}</p>
+                        <p>{{ settings.attempts }} attempts</p>
+                        <form method="POST" action="{{ url_for('game.start_game') }}">
+                            <input type="hidden" name="level" value="{{ level }}">
+                            <button type="submit" class="btn btn-{% if level == 'easy' %}success{% elif level == 'medium' %}warning{% else %}danger{% endif %}">
+                                Play {{ level|title }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

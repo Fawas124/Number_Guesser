@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4 text-center">Leaderboard</h1>
+    
+    <!-- Top Players Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2>Top Players</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            <th>Best Score</th>
+                            <th>Games Won</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player in top_players %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ player.username }}</td>
+                            <td>{{ player.best_score }}</td>
+                            <td>{{ player.games_won }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Winners Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h2>Recent Winners</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Level</th>
+                            <th>Score</th>
+                            <th>Attempts Left</th>
+                            <th>When</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for game in recent_winners %}
+                        <tr>
+                            <td>{{ game.user.username }}</td>
+                            <td>{{ game.level|title }}</td>
+                            <td>{{ game.score }}</td>
+                            <td>{{ game.attempts_left }}</td>
+                            <td>{{ game.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Level Leaderboards -->
+    <div class="row">
+        {% for level, data in level_leaders.items() %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h3>{{ level|title }} Level</h3>
+                    <small>Range: 1-{{ data.settings.range[1] }} | Multiplier: {{ data.settings.multiplier }}x</small>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Player</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for game in data.games %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ game.user.username }}</td>
+                                    <td>{{ game.score }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No games yet</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Play Game{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-4">
+  <div class="col-md-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <h3 class="text-center mb-0">
+          Number Guessing Game – {{ game.level|title }} Level
+        </h3>
+      </div>
+      <div class="card-body">
+
+        <!-- Progress Bar -->
+        <div class="progress mb-4">
+          <div class="progress-bar" role="progressbar"
+               style="width: {{ (game.attempts_left / LEVEL_SETTINGS[game.level]['attempts']) * 100 }}%"
+               aria-valuenow="{{ game.attempts_left }}"
+               aria-valuemin="0"
+               aria-valuemax="{{ LEVEL_SETTINGS[game.level]['attempts'] }}">
+            {{ game.attempts_left }} attempts left
+          </div>
+        </div>
+
+        <!-- Guess Prompt -->
+        <div class="alert alert-info">
+          <p>Guess a number between {{ range_low }} and {{ range_high }}</p>
+          {% if hint %}
+            <p class="fw-bold">Your last guess was {{ hint }}!</p>
+          {% endif %}
+        </div>
+
+        <!-- Guess Form -->
+        <form method="POST" class="row g-3 mb-5">
+          <div class="col-md-8">
+            <input type="number" name="guess" class="form-control"
+                   min="{{ range_low }}" max="{{ range_high }}"
+                   placeholder="Enter your guess" required>
+          </div>
+          <div class="col-md-4">
+            <button type="submit" class="btn btn-primary w-100">
+              Submit Guess
+            </button>
+          </div>
+        </form>
+
+        <!-- Game History -->
+        <div class="guess-history">
+          <h5 class="mb-3">Previous Guesses</h5>
+          {% if game.guesses.count() > 0 %}
+            <ul class="list-group">
+                {% for guess in game.guesses %}
+                <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                  <div class="d-flex align-items-center">
+                    <span class="badge bg-secondary me-2">#{{ loop.revindex }}</span>
+                    <span class="fw-bold me-3">{{ guess.guess_value }}</span>
+                    <span class="badge bg-{{ 'success' if guess.result == 'correct' else 'info' }}">
+                      {{ guess.result.replace('_',' ')|title }}
+                    </span>
+                  </div>
+                  <small class="text-muted">{{ guess.created_at|datetimeformat('%b %d, %Y %I:%M %p') }}</small>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="text-center py-3">
+              <p class="text-muted">No guesses yet. Make your first guess!</p>
+            </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

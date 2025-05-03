@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="jumbotron mt-4">
+        <h1 class="display-4">Welcome to Number Guesser!</h1>
+        <p class="lead">A fun and challenging number guessing game with multiple difficulty levels.</p>
+        <hr class="my-4">
+        <p>Test your intuition and see how quickly you can guess the secret number!</p>
+        {% if current_user.is_authenticated %}
+            <a class="btn btn-primary btn-lg" href="{{ url_for('game.select_level') }}" role="button">Play Now</a>
+        {% else %}
+            <a class="btn btn-primary btn-lg me-2" href="{{ url_for('auth.register') }}" role="button">Register</a>
+            <a class="btn btn-outline-primary btn-lg" href="{{ url_for('auth.login') }}" role="button">Login</a>
+        {% endif %}
+    </div>
+    
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Multiple Levels</h5>
+                    <p class="card-text">Choose from Easy, Medium, or Hard difficulty levels to match your skill.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Track Your Progress</h5>
+                    <p class="card-text">View your statistics and see how you improve over time.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Compete with Friends</h5>
+                    <p class="card-text">Climb the leaderboard and show off your guessing skills.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
