@@ -28,14 +28,24 @@
                     </div>
                     <div class="mb-3">
                         {{ form.password.label(class="form-label") }}
-                        {{ form.password(class="form-control") }}
+                        <div class="input-group">
+                            {{ form.password(class="form-control", id="registerPassword") }}
+                            <button class="btn btn-outline-secondary" type="button" id="toggleRegisterPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                         {% for error in form.password.errors %}
                             <div class="text-danger">{{ error }}</div>
                         {% endfor %}
                     </div>
                     <div class="mb-3">
                         {{ form.confirm_password.label(class="form-label") }}
-                        {{ form.confirm_password(class="form-control") }}
+                        <div class="input-group">
+                            {{ form.confirm_password(class="form-control", id="registerConfirmPassword") }}
+                            <button class="btn btn-outline-secondary" type="button" id="toggleRegisterConfirmPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                         {% for error in form.confirm_password.errors %}
                             <div class="text-danger">{{ error }}</div>
                         {% endfor %}
@@ -51,4 +61,35 @@
         </div>
     </div>
 </div>
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle for password field
+    const togglePassword = document.querySelector('#toggleRegisterPassword');
+    const password = document.querySelector('#registerPassword');
+    const passwordIcon = togglePassword.querySelector('i');
+    
+    // Toggle for confirm password field
+    const toggleConfirmPassword = document.querySelector('#toggleRegisterConfirmPassword');
+    const confirmPassword = document.querySelector('#registerConfirmPassword');
+    const confirmPasswordIcon = toggleConfirmPassword.querySelector('i');
+    
+    togglePassword.addEventListener('click', function() {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        passwordIcon.classList.toggle('fa-eye');
+        passwordIcon.classList.toggle('fa-eye-slash');
+    });
+    
+    toggleConfirmPassword.addEventListener('click', function() {
+        const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPassword.setAttribute('type', type);
+        confirmPasswordIcon.classList.toggle('fa-eye');
+        confirmPasswordIcon.classList.toggle('fa-eye-slash');
+    });
+});
+</script>
+{% endblock %}
 {% endblock %}
