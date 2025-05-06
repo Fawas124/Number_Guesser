@@ -1,0 +1,43 @@
+<!-- app/templates/admin/dashboard.html -->
+{% extends "admin/base.html" %}  <!-- Different from user base -->
+
+{% block content %}
+<div class="container">
+    <h1>Admin Dashboard</h1>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">User Management</div>
+                <div class="card-body">
+                    <a href="{{ url_for('admin.manage_users') }}" class="btn btn-primary">
+                        Manage Users
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">Game Content</div>
+                <div class="card-body">
+                    <a href="{{ url_for('admin.manage_content') }}" class="btn btn-success">
+                        Manage Game Content
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">System</div>
+                <div class="card-body">
+                    <a href="{{ url_for('admin.system_settings') }}" class="btn btn-info">
+                        System Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

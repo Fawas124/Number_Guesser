@@ -1,0 +1,72 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Manage Games - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Game Sessions</h1>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Player</th>
+                            <th>Level</th>
+                            <th>Status</th>
+                            <th>Score</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for game in games.items %}
+                        <tr>
+                            <td>{{ game.id }}</td>
+                            <td>{{ game.player.username }}</td>
+                            <td>{{ game.level|title }}</td>
+                            <td>
+                                {% if game.completed %}
+                                    {% if game.won %}
+                                        <span class="badge bg-success">Won</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Lost</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-primary">In Progress</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ game.score }}</td>
+                            <td>{{ game.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <a href="{{ url_for('admin.view_game', game_id=game.id) }}" class="btn btn-sm btn-info">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if games.has_prev %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('admin.manage_games', page=games.prev_num) }}">Previous</a></li>
+                    {% endif %}
+                    
+                    {% for page_num in games.iter_pages() %}
+                    <li class="page-item {% if page_num == games.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin.manage_games', page=page_num) }}">{{ page_num }}</a>
+                    </li>
+                    {% endfor %}
+                    
+                    {% if games.has_next %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('admin.manage_games', page=games.next_num) }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}

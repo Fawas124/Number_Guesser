@@ -1,0 +1,62 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Manage Content</h2>
+
+    <form class="mb-4" method="GET" action="{{ url_for('admin.manage_content') }}">
+        <div class="input-group">
+            <input type="text" class="form-control" name="q" value="{{ search }}" placeholder="Search content...">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+    
+    <!-- Content List -->
+    <div class="list-group mb-4">
+        {% for word in words.items %}
+        <div class="list-group-item">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h5>{{ word.text }}</h5>
+                    <span class="badge bg-secondary">Level {{ word.difficulty }}</span>
+                    {% if not word.is_active %}
+                        <span class="badge bg-danger">Inactive</span>
+                    {% endif %}
+                </div>
+                <div>
+                    <a href="{{ url_for('admin.edit_word', word_id=word.id) }}" 
+                       class="btn btn-sm btn-primary">Edit</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            {% if words.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('admin.manage_content', page=words.prev_num) }}">Previous</a>
+            </li>
+            {% endif %}
+            
+            {% for page_num in words.iter_pages() %}
+                {% if page_num %}
+                    <li class="page-item {% if page_num == words.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin.manage_content', page=page_num) }}">{{ page_num }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if words.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('admin.manage_content', page=words.next_num) }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock %}

@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, flash, current_app
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask_login import LoginManager, current_user
 from flask_bootstrap import Bootstrap
 from config import Config
@@ -12,6 +13,7 @@ import random
 
 # Initialize extensions
 db = SQLAlchemy()
+migrate = Migrate()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 bootstrap = Bootstrap()
@@ -34,6 +36,9 @@ def create_app(config_class=Config):
     # Register template filters and context processors
     register_template_utilities(app)
     
+    # Register CLI commands
+    register_commands(app)
+    
     # Setup database
     setup_database(app)
     
@@ -53,6 +58,7 @@ def configure_sqlite():
 def initialize_extensions(app):
     """Initialize Flask extensions with the application"""
     db.init_app(app)
+    migrate.init_app(app, db)
     login_manager.init_app(app)
     bootstrap.init_app(app)
 
@@ -63,12 +69,14 @@ def register_blueprints(app):
     from app.game import bp as game_bp
     from app.errors import bp as errors_bp
     from app.leaderboard import bp as leaderboard_bp
+    from app.admin import bp as admin_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(game_bp)
     app.register_blueprint(errors_bp)
     app.register_blueprint(leaderboard_bp, url_prefix='/leaderboard')
+    app.register_blueprint(admin_bp)
 
 def register_template_utilities(app):
     """Register custom template filters and context processors"""
@@ -84,6 +92,63 @@ def register_template_utilities(app):
         """Ensure database session is removed after each request"""
         db.session.remove()
 
+def register_commands(app):
+    """Register custom CLI commands"""
+    from app.models import User, Word
+    
+    @app.cli.command('create-admin')
+    def create_admin():
+        """Create admin user"""
+        with app.app_context():
+            if not User.query.filter_by(username='admin').first():
+                admin = User(
+                    username='admin',
+                    email='fawassurajudeen16@gmail.com',
+                    is_admin=True
+                )
+                admin.set_password('Olamilekan123')
+                db.session.add(admin)
+                db.session.commit()
+                print('Admin user created successfully!')
+            else:
+                print('Admin user already exists')
+    
+    @app.cli.command('seed-words')
+    def seed_words():
+        """Add sample words to database"""
+        sample_words = [
+            {'text': 'apple', 'difficulty': 1},
+            {'text': 'banana', 'difficulty': 1},
+            {'text': 'challenge', 'difficulty': 2},
+            {'text': 'difficult', 'difficulty': 3},
+            {'text': 'elephant', 'difficulty': 1},
+            {'text': 'fantastic', 'difficulty': 2},
+            {'text': 'gigantic', 'difficulty': 3},
+            {'text': 'harmony', 'difficulty': 2}
+        ]
+        
+        with app.app_context():
+            added_count = 0
+            for word_data in sample_words:
+                if not Word.query.filter_by(text=word_data['text']).first():
+                    word = Word(
+                        text=word_data['text'],
+                        difficulty=word_data['difficulty'],
+                        created_at=datetime.utcnow(),
+                        is_active=True
+                    )
+                    db.session.add(word)
+                    added_count += 1
+            
+            try:
+                db.session.commit()
+                print(f"Added {added_count} new words to database")
+                if added_count < len(sample_words):
+                    print(f"{len(sample_words) - added_count} words already existed")
+            except Exception as e:
+                db.session.rollback()
+                print(f"Error seeding words: {str(e)}")
+
 def setup_database(app):
     """Setup database and create tables if they don't exist"""
     with app.app_context():
@@ -93,7 +158,7 @@ def setup_database(app):
 from app.models import User
 from app.auth.forms import RegistrationForm
 
-def register_routes(bp):
+def register_auth_routes(bp):
     """Register auth routes with the blueprint"""
     @bp.route('/register', methods=['GET', 'POST'])
     def register():

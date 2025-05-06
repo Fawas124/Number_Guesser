@@ -1,0 +1,77 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Game Details - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Game Session Details</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Game #{{ game.id }}</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Player:</strong> {{ game.player.username }}</p>
+                    <p><strong>Level:</strong> {{ game.level|title }}</p>
+                    <p><strong>Status:</strong> 
+                        {% if game.completed %}
+                            {% if game.won %}Won{% else %}Lost{% endif %}
+                        {% else %}
+                            In Progress
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Score:</strong> {{ game.score }}</p>
+                    <p><strong>Started:</strong> {{ game.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    {% if game.completed %}
+                    <p><strong>Ended:</strong> {{ game.end_time.strftime('%Y-%m-%d %H:%M') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3>Guesses</h3>
+        </div>
+        <div class="card-body">
+            {% if game.guesses %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Guess</th>
+                            <th>Result</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for guess in game.guesses %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ guess.guess_value }}</td>
+                            <td>
+                                {% if guess.result == 'correct' %}
+                                    <span class="badge bg-success">Correct</span>
+                                {% else %}
+                                    <span class="badge bg-info">{{ guess.result|title }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ guess.created_at.strftime('%H:%M:%S') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p>No guesses recorded for this game.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

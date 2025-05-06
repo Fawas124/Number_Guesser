@@ -1,0 +1,23 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Edit Word: {{ word.text }}</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+            {{ form.text.label(class="form-label") }}
+            {{ form.text(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.difficulty.label(class="form-label") }}
+            {{ form.difficulty(class="form-control") }}
+        </div>
+        <div class="mb-3 form-check">
+            {{ form.is_active(class="form-check-input") }}
+            {{ form.is_active.label(class="form-check-label") }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+</div>
+{% endblock %}

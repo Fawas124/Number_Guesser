@@ -1,0 +1,58 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Game Content - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Game Content Management</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Difficulty Levels</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Level</th>
+                            <th>Range</th>
+                            <th>Attempts</th>
+                            <th>Multiplier</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for level, settings in LEVEL_SETTINGS.items() %}
+                        <tr>
+                            <td>{{ level|title }}</td>
+                            <td>{{ settings.range[0] }} - {{ settings.range[1] }}</td>
+                            <td>{{ settings.attempts }}</td>
+                            <td>{{ settings.multiplier }}x</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary">Edit</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3>Game Instructions</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('admin.update_instructions') }}">
+                <div class="mb-3">
+                    <label for="instructions" class="form-label">Instructions</label>
+                    <textarea class="form-control" id="instructions" name="instructions" rows="5">{{ instructions }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
