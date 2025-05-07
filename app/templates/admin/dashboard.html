@@ -1,12 +1,12 @@
 <!-- app/templates/admin/dashboard.html -->
-{% extends "admin/base.html" %}  <!-- Different from user base -->
+{% extends "admin/base.html" %}
 
 {% block content %}
 <div class="container">
     <h1>Admin Dashboard</h1>
     
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card">
                 <div class="card-header">User Management</div>
                 <div class="card-body">
@@ -17,7 +17,7 @@
             </div>
         </div>
         
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card">
                 <div class="card-header">Game Content</div>
                 <div class="card-body">
@@ -28,12 +28,23 @@
             </div>
         </div>
         
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card">
                 <div class="card-header">System</div>
                 <div class="card-body">
                     <a href="{{ url_for('admin.system_settings') }}" class="btn btn-info">
                         System Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">User Feedback</div>
+                <div class="card-body">
+                    <a href="{{ url_for('admin.manage_feedback') }}" class="btn btn-warning">
+                        View Feedback
                     </a>
                 </div>
             </div>

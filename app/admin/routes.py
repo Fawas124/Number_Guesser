@@ -141,6 +141,12 @@ def manage_feedback():
     )
     return render_template('admin/feedback.html', feedback=feedback)
 
+@bp.route('/view_feedback')
+def view_feedback():
+    """Alternative view for feedback (non-paginated)"""
+    feedbacks = Feedback.query.order_by(Feedback.created_at.desc()).all()
+    return render_template('admin/view_feedback.html', feedbacks=feedbacks)
+
 @bp.route('/delete_feedback/<int:feedback_id>', methods=['POST'])
 def delete_feedback(feedback_id):
     """Delete feedback entry"""
@@ -166,20 +172,20 @@ def manage_content():
     # Set defaults if they don't exist
     if not easy.range_low:
         easy.range_low = 1
-        easy.range_high = 50
-        easy.max_attempts = 10
+        easy.range_high = 10
+        easy.max_attempts = 5
         db.session.commit()
     
     if not medium.range_low:
         medium.range_low = 1
-        medium.range_high = 100
+        medium.range_high = 50
         medium.max_attempts = 7
         db.session.commit()
         
     if not hard.range_low:
         hard.range_low = 1
-        hard.range_high = 200
-        hard.max_attempts = 5
+        hard.range_high = 100
+        hard.max_attempts = 10
         db.session.commit()
     
     return render_template('admin/manage_content.html',
