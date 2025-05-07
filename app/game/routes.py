@@ -1,14 +1,14 @@
 import random
 from datetime import datetime
 
-from flask import render_template, request, flash, redirect, url_for
+from flask import render_template, request, flash, redirect, url_for, current_app
 from flask_login import current_user, login_required
 from sqlalchemy.orm import joinedload
 
 from app import db
 from app.game import bp
 from app.game.constants import LEVEL_SETTINGS
-from app.models import GameSession, Guess, User
+from app.models import GameSession, Guess, User, Game
 
 @bp.route('/select-level')
 @login_required
@@ -215,3 +215,31 @@ def profile():
         user_stats=stats,
         recent_games=recent_games
     )
+
+@bp.route('/quit', methods=['POST'])
+@login_required
+def quit_game():
+    try:
+        # Get the current game session
+        game = GameSession.query.filter_by(
+            user_id=current_user.id,
+            completed=False
+        ).order_by(GameSession.created_at.desc()).first()
+
+        if game:
+            # Mark game as completed
+            game.completed = True
+            game.end_time = datetime.utcnow()
+            db.session.commit()
+            flash('Game ended successfully', 'info')
+        else:
+            flash('No active game found', 'warning')
+
+        return redirect(url_for('game.select_level'))
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error quitting game: {str(e)}")
+        flash('Error ending game', 'danger')
+        return redirect(url_for('main.index'))
+    

@@ -4,29 +4,59 @@ from flask_login import UserMixin
 from app import db, login_manager
 
 class Setting(db.Model):
-    """Application settings model"""
+    """Application settings model for game levels"""
     __tablename__ = 'settings'
     
     id = db.Column(db.Integer, primary_key=True)
-    app_name = db.Column(db.String(100), default='Number Guesser', nullable=False)
-    maintenance_mode = db.Column(db.Boolean, default=False, nullable=False)
-    max_attempts_easy = db.Column(db.Integer, default=10, nullable=False)
-    max_attempts_medium = db.Column(db.Integer, default=7, nullable=False)
-    max_attempts_hard = db.Column(db.Integer, default=5, nullable=False)
-    score_multiplier_easy = db.Column(db.Float, default=1.0, nullable=False)
-    score_multiplier_medium = db.Column(db.Float, default=1.5, nullable=False)
-    score_multiplier_hard = db.Column(db.Float, default=2.0, nullable=False)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
+    level = db.Column(db.String(20), unique=True)  # 'easy', 'medium', 'hard'
+    range_low = db.Column(db.Integer, default=1)
+    range_high = db.Column(db.Integer, default=100)
+    max_attempts = db.Column(db.Integer, default=10)
+    score_multiplier = db.Column(db.Float, default=1.0)
+    is_active = db.Column(db.Boolean, default=True)
+    
     @classmethod
-    def get_settings(cls):
-        """Get or create application settings"""
-        settings = cls.query.first()
-        if not settings:
-            settings = cls()
-            db.session.add(settings)
+    def get_settings(cls, level):
+        """Get or create settings for a specific level"""
+        setting = cls.query.filter_by(level=level).first()
+        if not setting:
+            # Create with default values
+            defaults = {
+                'easy': {'range_high': 100, 'max_attempts': 10, 'score_multiplier': 1.0},
+                'medium': {'range_high': 200, 'max_attempts': 7, 'score_multiplier': 1.5},
+                'hard': {'range_high': 300, 'max_attempts': 5, 'score_multiplier': 2.0}
+            }
+            
+            setting = cls(
+                level=level,
+                range_low=1,
+                range_high=defaults.get(level, {}).get('range_high', 100),
+                max_attempts=defaults.get(level, {}).get('max_attempts', 10),
+                score_multiplier=defaults.get(level, {}).get('score_multiplier', 1.0)
+            )
+            db.session.add(setting)
             db.session.commit()
-        return settings
+        return setting
+
+    def update_ranges(self, min_val, max_val, attempts):
+        """Validate and update number ranges"""
+        try:
+            min_val = int(min_val)
+            max_val = int(max_val)
+            attempts = int(attempts)
+            
+            if min_val >= max_val:
+                raise ValueError("Minimum must be less than maximum")
+            if attempts <= 0:
+                raise ValueError("Attempts must be positive")
+            
+            self.range_low = min_val
+            self.range_high = max_val
+            self.max_attempts = attempts
+            return True
+            
+        except ValueError as e:
+            raise ValueError(f"Invalid input: {str(e)}")
 
 class User(UserMixin, db.Model):
     """User account model"""
@@ -54,6 +84,7 @@ class User(UserMixin, db.Model):
         lazy='dynamic'
     )
     feedback = db.relationship('Feedback', backref='author', lazy='dynamic')
+    legacy_games = db.relationship('Game', back_populates='player', lazy='dynamic')
     
     def set_password(self, password):
         """Create hashed password"""
@@ -67,11 +98,7 @@ class User(UserMixin, db.Model):
         """Update last seen timestamp"""
         self.last_seen = datetime.utcnow()
         db.session.add(self)
-        try:
-            db.session.commit()
-        except:
-            db.session.rollback()
-            raise
+        db.session.commit()
 
 class GameSession(db.Model):
     """Game session model"""
@@ -80,11 +107,11 @@ class GameSession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     level = db.Column(db.String(20), nullable=False)
-    secret_number = db.Column(db.Integer, nullable=False)
+    secret_number = db.Column(db.Integer)
     attempts_left = db.Column(db.Integer, nullable=False)
     
-    current_range_low = db.Column(db.Integer, nullable=False)
-    current_range_high = db.Column(db.Integer, nullable=False)
+    current_range_low = db.Column(db.Integer)
+    current_range_high = db.Column(db.Integer)
     
     completed = db.Column(db.Boolean, default=False)
     won = db.Column(db.Boolean, default=False)
@@ -94,11 +121,7 @@ class GameSession(db.Model):
     end_time = db.Column(db.DateTime)
     
     # Relationships
-    user = db.relationship(
-        'User', 
-        back_populates='game_sessions',
-        foreign_keys=[user_id]
-    )
+    user = db.relationship('User', back_populates='game_sessions')
     guesses = db.relationship(
         'Guess',
         backref='game',
@@ -108,16 +131,12 @@ class GameSession(db.Model):
     
     def calculate_score(self):
         """Calculate score based on level and attempts left"""
-        settings = Setting.get_settings()
+        settings = Setting.get_settings(self.level)
+        if not settings:
+            return 0
+            
         base_score = self.attempts_left * 10
-        
-        if self.level == 'easy':
-            return int(base_score * settings.score_multiplier_easy)
-        elif self.level == 'medium':
-            return int(base_score * settings.score_multiplier_medium)
-        elif self.level == 'hard':
-            return int(base_score * settings.score_multiplier_hard)
-        return base_score
+        return int(base_score * settings.score_multiplier)
 
 class Guess(db.Model):
     """Game guess model"""
@@ -125,7 +144,7 @@ class Guess(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     game_id = db.Column(db.Integer, db.ForeignKey('game_sessions.id'), nullable=False)
-    guess_value = db.Column(db.Integer, nullable=False)
+    guess_value = db.Column(db.String(100), nullable=False)
     result = db.Column(db.String(50), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -142,16 +161,34 @@ class Feedback(db.Model):
     is_resolved = db.Column(db.Boolean, default=False)
 
 class Word(db.Model):
+    """Word model for word guessing game"""
+    __tablename__ = 'words'
+    
     id = db.Column(db.Integer, primary_key=True)
-    text = db.Column(db.String(100))  # Stores range like "1-100"
-    difficulty = db.Column(db.Integer) # 1-3 for easy-medium-hard
-    max_attempts = db.Column(db.Integer)  # Add this line
+    text = db.Column(db.String(100), nullable=False)
+    difficulty = db.Column(db.Integer, nullable=False)  # 1-3 for easy-medium-hard
+    max_attempts = db.Column(db.Integer, default=10)
     is_active = db.Column(db.Boolean, default=True)
     
     @property
     def difficulty_name(self):
         """Get difficulty as human-readable name"""
         return {1: 'easy', 2: 'medium', 3: 'hard'}.get(self.difficulty, 'unknown')
+
+class Game(db.Model):
+    """Legacy game model (for backward compatibility)"""
+    __tablename__ = 'games'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    level = db.Column(db.String(50))
+    won = db.Column(db.Boolean)
+    score = db.Column(db.Integer)
+    played_at = db.Column(db.DateTime, default=datetime.utcnow)
+    attempts = db.Column(db.Integer)
+    
+    # Relationship
+    player = db.relationship('User', back_populates='legacy_games')
 
 @login_manager.user_loader
 def load_user(user_id):

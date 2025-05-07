@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">{{ current_user.username }}'s Profile</h1>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Statistics</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Total Games Played
+                            <span class="badge bg-primary rounded-pill">{{ user_stats.total_games }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Games Won
+                            <span class="badge bg-success rounded-pill">{{ user_stats.games_won }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Win Percentage
+                            <span class="badge bg-info rounded-pill">{{ "%.2f"|format(user_stats.win_percentage) }}%</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Best Score
+                            <span class="badge bg-warning rounded-pill">{{ user_stats.best_score }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Recent Games</h3>
+                </div>
+                <div class="card-body">
+                    {% if recent_games %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Level</th>
+                                    <th>Result</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for game in recent_games %}
+                                <tr>
+                                    <td>{{ game.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ game.level|title }}</td>
+                                    <td>
+                                        {% if game.completed %}
+                                            {% if game.won %}
+                                                <span class="badge bg-success">Won</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Lost</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-primary">In Progress</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ game.score }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p>No games played yet. <a href="{{ url_for('game.select_level') }}">Start playing now!</a></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
