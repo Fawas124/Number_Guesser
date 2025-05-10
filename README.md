@@ -1,2 +1,2 @@
 ## 🥳 Play Online
-[Click here to play game!](http://192.168.8.200:5000)
+[Click here to play game!](http://127.0.0.1:5000)
