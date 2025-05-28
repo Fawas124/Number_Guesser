@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, current_user
 from flask_bootstrap import Bootstrap
-from config import Config
+from app.config import Config
 from datetime import datetime
 from sqlalchemy import event
 from sqlalchemy.engine import Engine

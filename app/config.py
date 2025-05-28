@@ -10,7 +10,9 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key'
     
     # Database configuration - supports both SQLite (development) and PostgreSQL (production)
-    SQLALCHEMY_DATABASE_URI = "postgresql://flaskuser:Olamilekan@localhost:5432/number_guesser_db"
+    # SQLALCHEMY_DATABASE_URI = "postgresql://flaskuser:Olamilekan@localhost:5432/number_guesser_db"
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///number_guesser.db')
+    # postgresql://number_guesser_db_3am6_user:Jv2g7jbU3OuekVidn3QkelhWT48ocsRD@dpg-d0rhne95pdvs73e0o860-a.oregon-postgres.render.com/number_guesser_db_3am6
     
     # Database engine options - different settings for SQLite vs PostgreSQL
     if SQLALCHEMY_DATABASE_URI.startswith('sqlite'):
