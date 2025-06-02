@@ -1,2 +1,2 @@
 ## 🌟 Play the Game Online!
-[Click here to play!](http://192.168.80.227:5000)
+[Click here to play!](https://number-guesser-sq30.onrender.com)
